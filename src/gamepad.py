@@ -1,29 +1,51 @@
 import vgamepad as vg
 
-xboxButtonMap = {
-    "dpadUp": vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_UP,
-    "dpadDown": vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_DOWN,
-    "dpadLeft": vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_LEFT,
-    "dpadRight": vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_RIGHT,
-    "start": vg.XUSB_BUTTON.XUSB_GAMEPAD_START,
-    "back": vg.XUSB_BUTTON.XUSB_GAMEPAD_BACK,
-    "leftThumb": vg.XUSB_BUTTON.XUSB_GAMEPAD_LEFT_THUMB,
-    "rightThumb": vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_THUMB,
-    "leftShoulder": vg.XUSB_BUTTON.XUSB_GAMEPAD_LEFT_SHOULDER,
-    "rightShoulder": vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_SHOULDER,
-    "guide": vg.XUSB_BUTTON.XUSB_GAMEPAD_GUIDE,
-    "a": vg.XUSB_BUTTON.XUSB_GAMEPAD_A,
-    "b": vg.XUSB_BUTTON.XUSB_GAMEPAD_B,
-    "x": vg.XUSB_BUTTON.XUSB_GAMEPAD_X,
-    "y": vg.XUSB_BUTTON.XUSB_GAMEPAD_Y
+XboxKeyCodeMap = {
+    "BTN_DPUP": vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_UP,
+    "BTN_DPDOWN": vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_DOWN,
+    "BTN_DPLEFT": vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_LEFT,
+    "BTN_DPRIGHT": vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_RIGHT,
+    "BTN_SELECT": vg.XUSB_BUTTON.XUSB_GAMEPAD_START,
+    "BTN_START": vg.XUSB_BUTTON.XUSB_GAMEPAD_BACK,
+    "BTN_THUMBL": vg.XUSB_BUTTON.XUSB_GAMEPAD_LEFT_THUMB,
+    "BTN_THUMBR": vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_THUMB,
+    "BTN_TL": vg.XUSB_BUTTON.XUSB_GAMEPAD_LEFT_SHOULDER,
+    "BTN_TR": vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_SHOULDER,
+    "BTN_SOUTH": vg.XUSB_BUTTON.XUSB_GAMEPAD_A,
+    "BTN_EAST": vg.XUSB_BUTTON.XUSB_GAMEPAD_B,
+    "BTN_WEST": vg.XUSB_BUTTON.XUSB_GAMEPAD_X,
+    "BTN_NORTH": vg.XUSB_BUTTON.XUSB_GAMEPAD_Y
 }
 
 class XboxGamepad:
     def __init__(self):
         self.gamepad = vg.VX360Gamepad()
+        self.gamepad.reset()
+        gamepad.update()
         
-    def PushButton(self, button):
-        self.gamepad
+    def PressKey(self, code):
+        self.gamepad.press_button(button=code)
+        self.gamepad.update()
+        
+    def ReleaseKey(self, code):
+        self.gamepad.release_button(button=code)
+        self.gamepad.update()
+        
+    def MoveLeftTrigger(self, val):
+        self.gamepad.left_trigger(value=val)
+        self.gamepad.update()
+        
+    def MoveRightTrigger(self, val):
+        self.gamepad.right_trigger(value=val)
+        self.gamepad.update()
+        
+    def MoveLeftJoystick(self, x, y):
+        self.gamepad.left_joystick(x_value=x, y_value=y)
+        self.gamepad.update()
+        
+    def MoveRightJoystick(self, x, y):
+        self.gamepad.right_joystick(x_value=x, y_value=y)
+        self.gamepad.update()
         
 class DualshockGamepad:
     def __init__(self):
