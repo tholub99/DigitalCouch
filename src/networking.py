@@ -1,5 +1,5 @@
 import socket
-import gamepad
+import user
 from inputs import get_gamepad
 from inputs import devices
 
@@ -22,13 +22,15 @@ class Server:
                 
             data = data.decode('utf-8')
             if(data.startswith('New Client') and not (addr in self.clients.keys())):
-                self.clients[addr] = gamepad.XboxGamepad()
+                if(user.AVAILABLE_IDS != [])
+                self.clients[addr] = user.User(user.AVAILABLE_IDS.pop())
             
             elif(data.startswith('Client Disconnecting') and (addr in self.clients.keys())):
+                user.AVAILABLE_IDS.append(self.clients[addr].GetID())
                 self.clients.pop(addr)
             
             else:
-                self.clients[addr].HandleInput(data)
+                self.clients[addr].Input(data)
                 
             print('Message from: ' + str(addr))
             print('From connected user: ' + data)
