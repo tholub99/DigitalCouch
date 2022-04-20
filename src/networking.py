@@ -47,18 +47,18 @@ class Client:
         self.Open()
         
     def Open(self):
-        mySocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.mySocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         
         msg = 'New Client'
-        mySocket.sendto(msg.encode('utf-8'), self.server)
+        self.mySocket.sendto(msg.encode('utf-8'), self.server)
         
     def Close(self):
         msg = 'Client Disconnecting'
-        mySocket.sendto(msg.encode('utf-8'), self.server)
-        mySocket.close()
+        self.mySocket.sendto(msg.encode('utf-8'), self.server)
+        self.mySocket.close()
     
     def SendMessageToServer(self, msg):
-        mySocket.sendto(msg.encode('utf-8'), self.server)
+        self.mySocket.sendto(msg.encode('utf-8'), self.server)
         
 if __name__ == '__main__':
     inp = int(input('1 - Server\n2 - Client\n-> '))
