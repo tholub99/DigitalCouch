@@ -27,8 +27,9 @@ def Client():
             #check for degOfError
             skipEvent = False
             if(event.code in AbsPrevEvent.keys()):
+                event.state = NegateJoyWobble(event)
                 if(AbsPrevEvent[event.code] != None):
-                    #skipEvent = DoE(event)
+                    skipEvent = IsDuplicateEvent(event)
                 else:
                     AbsPrevEvent[event.code] = event.state
                     
@@ -49,13 +50,15 @@ def Test():
         for event in events:
             if(event.ev_type == 'Sync'):
                 continue
-            #check for degOfError
+            #Account for Joystick wobble
             skipEvent = False
             if(event.code in AbsPrevEvent.keys()):
+                event.state = NegateJoyWobble(event)
                 if(AbsPrevEvent[event.code] != None):
-                    skipEvent = DoE(event)
+                    skipEvent = IsDuplicateEvent(event)
                 else:
                     AbsPrevEvent[event.code] = event.state
+                
                     
             #vPad.HandleEvent(event.ev_type, event.code, event.state)
             if(not skipEvent):
@@ -68,12 +71,16 @@ AbsPrevEvent = {
     'ABS_RX': None
 }
 
-def DoE(event):
-    if(abs(event.state - AbsPrevEvent[event.code]) <= 250):
+def IsDuplicateEvent(event):
+    if(abs(event.state - AbsPrevEvent[event.code]) <= 10):
         return True
     AbsPrevEvent[event.code] = event.state
     return False
     
+def NegateJoyWobble(event):
+    if(abs(event.state <= 5000)):
+        return 0
+    return event.state
 
 if __name__ == "__main__":
     inp = int(input('1 - Server\n2 - Client\n3 - Test\n-> '))
