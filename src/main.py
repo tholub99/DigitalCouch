@@ -23,10 +23,13 @@ def Client():
         for event in events:
             if(event.ev_type == 'Sync'):
                 continue
+            
             #check for degOfError
             skipEvent = False
-            if(event.ev_type == 'Absolute' and event.code in AbsPrevEvent.keys()):
+            if(event.code in AbsPrevEvent.keys()):
+                if(AbsPrevEvent[event.code] != None):
                     skipEvent = DoE(event)
+                else:
                     AbsPrevEvent[event.code] = event.state
                     
             if(not skipEvent):
@@ -48,8 +51,10 @@ def Test():
                 continue
             #check for degOfError
             skipEvent = False
-            if(event.ev_type == 'Absolute' and event.code in AbsPrevEvent.keys()):
+            if(event.code in AbsPrevEvent.keys()):
+                if(AbsPrevEvent[event.code] != None):
                     skipEvent = DoE(event)
+                else:
                     AbsPrevEvent[event.code] = event.state
                     
             #vPad.HandleEvent(event.ev_type, event.code, event.state)
@@ -64,8 +69,9 @@ AbsPrevEvent = {
 }
 
 def DoE(event):
-    if(AbsPrevEvent[event.code] != None and (event.state - AbsPrevEvent[event.code]) <= 250):
+    if(abs(event.state - AbsPrevEvent[event.code]) <= 250):
         return True
+    AbsPrevEvent[event.code] = event.state
     return False
     
 
@@ -73,8 +79,7 @@ if __name__ == "__main__":
     inp = int(input('1 - Server\n2 - Client\n3 - Test\n-> '))
     #Run Server
     while inp < 0 or inp > 3:
-        inp = int(input('-> '))
-        
+        inp = int(inp('-> '))
     if(inp == 1):
         Server()
     #Run Client
