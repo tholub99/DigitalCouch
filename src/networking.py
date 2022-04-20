@@ -10,10 +10,10 @@ class Host:
         self.RunServer()
         
     def RunServer(self):
-        mySocket = socket(socket.AF_INET, socket.SOCK_DGRAM)
+        mySocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         mySocket.bind((self.ip, self.port))
         
-        print('Server Started on', self.ip + ':' + self.port)
+        print('Server Started on', self.ip + ':' + str(self.port))
         while True:
             data, addr = mySocket.recvfrom(SIZE)
             data = data.decode('utf-8')
@@ -26,7 +26,7 @@ class Client:
         self.server = (ip, port)
         
     def ConnectToHost(self):
-        mySocket = socket(socket.AF_INET, socket.SOCK_DGRAM)
+        mySocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         msg = input('-> ')
         while msg != 'q':
             mySocket.sendto(msg.encode('utf-8'), self.server)
