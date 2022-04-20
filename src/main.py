@@ -14,17 +14,8 @@ def main():
         print(device)
     while 1:
         events = get_gamepad()
-        for event in events:
-            if(event.ev_type == 'Key'): #Static Button
-                
-                if(event.state == 1): #keyPress
-                    vPad.PressKey(event.code)
-                elif(event.state == 0): #keyRelease
-                    vPad.ReleaseKey(event.code)
-                    
-            elif(event.ev_type == 'Absolute'): #Varying Button
-                vPad.SetAbsInput(event.code, event.state)        
-                
+        for event in events:       
+            vPad.HandleInput(event)
             print(event.ev_type, event.code, event.state)
 
 if __name__ == "__main__":

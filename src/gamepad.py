@@ -37,6 +37,19 @@ class XboxGamepad:
         self.LJ = [0,0]
         self.RJ = [0,0]
         
+    def HandleInput(self, event):
+        #Static Button
+        if(event.ev_type == 'Key'):
+                #keyPress
+                if(event.state == 1):
+                    self.PressKey(event.code)
+                #keyRelease
+                elif(event.state == 0):
+                    self.ReleaseKey(event.code)
+        #Varying Button           
+        elif(event.ev_type == 'Absolute'):
+            self.SetAbsInput(event.code, event.state) 
+        
     def PressKey(self, code):
         self.gamepad.press_button(button=XboxKeyCodeMap[code])
         self.gamepad.update()

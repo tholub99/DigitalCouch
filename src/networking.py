@@ -1,45 +1,80 @@
 import socket
+import gamepad
+from inputs import get_gamepad
+from inputs import devices
 
 SIZE = 1024
 
-class Host:
+class Server:
     def __init__(self):
         self.ip = '192.168.0.11'
         self.port = 5000
         self.clients = {}
-        self.RunServer()
+        self.Run()
         
-    def RunServer(self):
+    def Run(self):
         mySocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         mySocket.bind((self.ip, self.port))
         
         print('Server Started on', self.ip + ':' + str(self.port))
         while True:
             data, addr = mySocket.recvfrom(SIZE)
+                
             data = data.decode('utf-8')
+            if(data.startswith('New Client') and not (addr in self.clients.keys())):
+                self.clients[addr] = gamepad.XboxGamepad()
+            
+            elif(data.startswith('Client Disconnecting') and (addr in self.clients.keys())):
+                self.clients.pop(addr)
+            
+            else:
+                self.clients[addr].HandleInput(data)
+                
             print('Message from: ' + str(addr))
             print('From connected user: ' + data)
+            
+            
+        self.Close()
+    
+    def Close(self):
         mySocket.close()
 
 class Client:
     def __init__(self, ip, port):
         self.server = (ip, port)
-        self.ConnectToHost()
+        self.Open()
         
-    def ConnectToHost(self):
+    def Open(self):
         mySocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        msg = input('-> ')
-        while msg != 'q':
-            mySocket.sendto(msg.encode('utf-8'), self.server)
-            print("Message sent to server")
-            msg = input('-> ')
+        
+        msg = 'New Client'
+        mySocket.sendto(msg.encode('utf-8'), self.server)
+        
+    def Close(self):
+        msg = 'Client Disconnecting'
+        mySocket.sendto(msg.encode('utf-8'), self.server)
         mySocket.close()
+    
+    def SendMessageToServer(self, msg):
+        mySocket.sendto(msg.encode('utf-8'), self.server)
         
 if __name__ == '__main__':
-    inp = int(input('1 - Host\n2 - Client\n-> '))
+    inp = int(input('1 - Server\n2 - Client\n-> '))
+    #Run Server
     if(inp == 1):
-        host = Host()
+        server = Server()
+    #Run Client
     elif(inp == 2):
         ip = input('Server IP -> ')
         port = int(input('Server Port -> '))
         client = Client(ip, port)
+        
+        for device in devices:
+            print(device)
+        while True:
+            events = get_gamepad()
+            for event in events:
+                eventMsg = event.ev_type + ' ' + event.code + ' ' + event.state
+                client.SendMessageToServer(eventMsg)
+                print(event.ev_type, event.code, event.state)
+        client.Close();
