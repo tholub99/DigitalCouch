@@ -112,11 +112,11 @@ class XboxGamepad:
         self.gamepad.left_joystick(x_value=self.LJ[0], y_value=y)
         self.LJ[1] = y
         
-    def MoveRightJoystickX(self, x):
+    def SetRightJoystickX(self, x):
         self.gamepad.right_joystick(x_value=x, y_value=self.RJ[1])
         self.RJ[0] = x
         
-    def MoveRightJoystickY(self, y):
+    def SetRightJoystickY(self, y):
         self.gamepad.right_joystick(x_value=self.RJ[0], y_value=y)
         self.RJ[1] = y
         
