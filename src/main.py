@@ -28,7 +28,7 @@ def Client():
             skipEvent = False
             if(event.code in AbsPrevEvent.keys()):
                 if(AbsPrevEvent[event.code] != None):
-                    skipEvent = DoE(event)
+                    #skipEvent = DoE(event)
                 else:
                     AbsPrevEvent[event.code] = event.state
                     
