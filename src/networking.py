@@ -76,7 +76,7 @@ if __name__ == '__main__':
         while True:
             events = get_gamepad()
             for event in events:
-                eventMsg = event.ev_type + ' ' + event.code + ' ' + event.state
+                eventMsg = event.ev_type + '|' + event.code + '|' + str(event.state)
                 client.SendMessageToServer(eventMsg)
                 print(event.ev_type, event.code, event.state)
         client.Close();

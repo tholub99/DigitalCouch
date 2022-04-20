@@ -15,7 +15,7 @@ def main():
     while 1:
         events = get_gamepad()
         for event in events:       
-            vPad.HandleInput(event)
+            vPad.HandleEvent(event.ev_type, event.code, event.state)
             print(event.ev_type, event.code, event.state)
 
 if __name__ == "__main__":
