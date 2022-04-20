@@ -8,14 +8,14 @@ class Host:
         self.players = []
 
 def main():
-    vPad = gamepad.XboxGamepad()
+    #vPad = gamepad.XboxGamepad()
     """Just print out some event infomation when the gamepad is used."""
     for device in devices:
         print(device)
     while 1:
         events = get_gamepad()
         for event in events:       
-            vPad.HandleEvent(event.ev_type, event.code, event.state)
+            #vPad.HandleEvent(event.ev_type, event.code, event.state)
             print(event.ev_type, event.code, event.state)
 
 if __name__ == "__main__":
