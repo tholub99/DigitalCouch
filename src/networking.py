@@ -22,14 +22,14 @@ class Server:
                 
             data = data.decode('utf-8')
             if(data.startswith('New Client') and not (addr in self.clients.keys())):
-                if(user.AVAILABLE_IDS != [])
-                self.clients[addr] = user.User(user.AVAILABLE_IDS.pop())
+                if(user.AVAILABLE_IDS != []):
+                    self.clients[addr] = user.User(user.AVAILABLE_IDS.pop())
             
             elif(data.startswith('Client Disconnecting') and (addr in self.clients.keys())):
                 user.AVAILABLE_IDS.append(self.clients[addr].GetID())
                 self.clients.pop(addr)
             
-            else:
+            elif(addr in self.clients.keys()):
                 self.clients[addr].Input(data)
                 
             print('Message from: ' + str(addr))
