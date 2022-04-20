@@ -11,7 +11,7 @@ class User:
         event = inp.split('|')
         eventType = event[0]
         eventCode = event[1]
-        eventState = event[2]
+        eventState = int(event[2])
         
         self.vPad.HandleEvent(eventType, eventCode, eventState)
         
