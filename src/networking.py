@@ -24,6 +24,7 @@ class Host:
 class Client:
     def __init__(self, ip, port):
         self.server = (ip, port)
+        self.ConnectToHost()
         
     def ConnectToHost(self):
         mySocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
