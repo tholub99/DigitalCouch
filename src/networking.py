@@ -67,9 +67,9 @@ if __name__ == '__main__':
         server = Server()
     #Run Client
     elif(inp == 2):
-        ip = input('Server IP -> ')
-        port = int(input('Server Port -> '))
-        client = Client(ip, port)
+        #ip = input('Server IP -> ')
+        #port = int(input('Server Port -> '))
+        client = Client('192.168.0.11', 5000)
         
         for device in devices:
             print(device)
