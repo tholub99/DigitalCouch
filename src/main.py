@@ -78,7 +78,7 @@ def IsDuplicateEvent(event):
     return False
     
 def NegateJoyWobble(event):
-    if(abs(event.state <= 5000)):
+    if(abs(event.state) <= 5000):
         return 0
     return event.state
 
