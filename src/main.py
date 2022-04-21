@@ -1,8 +1,10 @@
 from inputs import get_gamepad
 from inputs import devices
 from player import Player
+from threading import Thread, Lock
 import gamepad
 import networking
+import time
 
 class Host:
     def __init__(self):
@@ -17,26 +19,14 @@ def Client():
     
     for device in devices:
         print(device)
+    clientThread = Thread(target=ClientThread, args=(client,))
+    eventThread = Thread(target=EventThread, args=())
 
-    while True:
-        events = get_gamepad()
-        for event in events:
-            if(event.ev_type == 'Sync'):
-                continue
-            
-            #check for degOfError
-            skipEvent = False
-            if(event.code in AbsPrevEvent.keys()):
-                event.state = NegateJoyWobble(event)
-                if(AbsPrevEvent[event.code] != None):
-                    skipEvent = IsDuplicateEvent(event)
-                else:
-                    AbsPrevEvent[event.code] = event.state
-                    
-            if(not skipEvent):
-                eventMsg = event.ev_type + '|' + event.code + '|' + str(event.state)
-                client.SendMessageToServer(eventMsg)
-                print(event.ev_type, event.code, event.state)
+    eventThread.start()
+    clientThread.start()
+    
+    eventThread.join()
+    clientThread.join()
     client.Close();
     
 def Test():
@@ -44,9 +34,19 @@ def Test():
     """Just print out some event infomation when the gamepad is used."""
     for device in devices:
         print(device)
+    clientThread = Thread(target=ClientTestThread, args=())
+    eventThread = Thread(target=EventThread, args=())
     
-    while 1:
+    eventThread.start()
+    clientThread.start()
+    
+    eventThread.join()
+    clientThread.join()
+    
+    
+    '''while 1:
         events = get_gamepad()
+
         for event in events:
             if(event.ev_type == 'Sync'):
                 continue
@@ -60,9 +60,62 @@ def Test():
                     AbsPrevEvent[event.code] = event.state
                 
                     
-            #vPad.HandleEvent(event.ev_type, event.code, event.state)
             if(not skipEvent):
-                print(event.ev_type, event.code, event.state)
+                print(event.ev_type, event.code, event.state)'''
+
+RecentEvents = {}
+lock = Lock()
+
+def EventThread():
+    global RecentEvents
+    global lock
+    while True:
+        events = get_gamepad()
+        #print(events)
+        for event in events:
+            if(event.ev_type == 'Sync'):
+                continue
+            #Account for Joystick wobble
+            skipEvent = False
+            if(event.code in AbsPrevEvent.keys()):
+                event.state = NegateJoyWobble(event)
+                if(AbsPrevEvent[event.code] != None):
+                    skipEvent = IsDuplicateEvent(event)
+                else:
+                    AbsPrevEvent[event.code] = event.state
+                
+            if(not skipEvent):
+                with lock:
+                    RecentEvents[event.code] = event
+        #print(RecentEvents)
+
+def ClientTestThread():
+    global RecentEvents
+    global lock
+    while True:
+        #print(RecentEvents)
+        with lock:
+            events = list(RecentEvents.values())
+            RecentEvents.clear()
+        for event in events:
+            print(event.ev_type, event.code, event.state)
+        time.sleep(0.05)
+        
+def ClientThread(client):
+    global RecentEvents
+    global lock
+    while True:
+        #print(RecentEvents)
+        with lock:
+            events = list(RecentEvents.values())
+            RecentEvents.clear()
+        for event in events:
+            eventMsg = event.ev_type + '|' + event.code + '|' + str(event.state)
+            client.SendMessageToServer(eventMsg)
+            
+            print(event.ev_type, event.code, event.state)
+            
+        time.sleep(0.05)
 
 AbsPrevEvent = {
     'ABS_Y': None,
