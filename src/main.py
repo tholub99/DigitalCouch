@@ -20,7 +20,7 @@ def Client():
     for device in devices:
         print(device)
     clientThread = Thread(target=ClientThread, args=(client,))
-    eventThread = Thread(target=EventThread, args=())
+    eventThread = Thread(target=EventThread, args=(client,))
 
     eventThread.start()
     clientThread.start()
@@ -30,12 +30,11 @@ def Client():
     client.Close();
     
 def Test():
-    #vPad = gamepad.XboxGamepad()
     """Just print out some event infomation when the gamepad is used."""
     for device in devices:
         print(device)
     clientThread = Thread(target=ClientTestThread, args=())
-    eventThread = Thread(target=EventThread, args=())
+    eventThread = Thread(target=EventTestThread, args=())
     
     eventThread.start()
     clientThread.start()
@@ -66,7 +65,43 @@ def Test():
 RecentEvents = {}
 lock = Lock()
 
-def EventThread():
+def EventTestThread():
+    global RecentEvents
+    global lock
+    while True:
+        events = get_gamepad()
+        for event in events:
+            if(event.ev_type == 'Sync'):
+                continue
+            #Account for Joystick wobble
+            skipEvent = False
+            if(event.code in AbsPrevEvent.keys()):
+                event.state = NegateJoyWobble(event)
+                if(AbsPrevEvent[event.code] != None):
+                    skipEvent = IsDuplicateEvent(event)
+                else:
+                    AbsPrevEvent[event.code] = event.state
+                    
+                if(not skipEvent):
+                    with lock:
+                        RecentEvents[event.code] = event
+                continue
+                
+            print(event.ev_type, event.code, event.state)
+
+def ClientTestThread():
+    global RecentEvents
+    global lock
+    while True:
+        #print(RecentEvents)
+        with lock:
+            events = list(RecentEvents.values())
+            RecentEvents.clear()
+        for event in events:
+            print(event.ev_type, event.code, event.state)
+        time.sleep(0.1)
+
+def EventThread(client):
     global RecentEvents
     global lock
     while True:
@@ -83,24 +118,16 @@ def EventThread():
                     skipEvent = IsDuplicateEvent(event)
                 else:
                     AbsPrevEvent[event.code] = event.state
+                    
+                if(not skipEvent):
+                    with lock:
+                        RecentEvents[event.code] = event
+                continue
                 
-            if(not skipEvent):
-                with lock:
-                    RecentEvents[event.code] = event
-        #print(RecentEvents)
-
-def ClientTestThread():
-    global RecentEvents
-    global lock
-    while True:
-        #print(RecentEvents)
-        with lock:
-            events = list(RecentEvents.values())
-            RecentEvents.clear()
-        for event in events:
+            eventMsg = event.ev_type + '|' + event.code + '|' + str(event.state)
+            client.SendMessageToServer(eventMsg)
             print(event.ev_type, event.code, event.state)
-        time.sleep(0.05)
-        
+
 def ClientThread(client):
     global RecentEvents
     global lock
@@ -115,7 +142,7 @@ def ClientThread(client):
             
             print(event.ev_type, event.code, event.state)
             
-        time.sleep(0.05)
+        time.sleep(0.1)
 
 AbsPrevEvent = {
     'ABS_Y': None,
