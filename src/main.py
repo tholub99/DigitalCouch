@@ -15,7 +15,7 @@ def Server():
 def Client():
     #ip = input('Server IP -> ')
     #port = int(input('Server Port -> '))
-    client = networking.Client('192.168.0.11', 5000)
+    client = networking.Client('71.232.60.65', 5000)
     
     for device in devices:
         print(device)

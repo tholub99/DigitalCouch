@@ -7,19 +7,22 @@ SIZE = 1024
 
 class Server:
     def __init__(self):
-        self.ip = '192.168.0.11'
+        self.ip = socket.gethostname()
         self.port = 5000
         self.clients = {}
         self.Run()
         
     def Run(self):
-        mySocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        mySocket.bind((self.ip, self.port))
+        self.mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.mySocket.bind((self.ip, self.port))
+        self.mySocket.listen(1)
         
         print('Server Started on', self.ip + ':' + str(self.port))
+        
+        conn, addr = self.mySocket.accept()
         while True:
-            data, addr = mySocket.recvfrom(SIZE)
-                
+            data = conn.recv(SIZE)
+            
             data = data.decode('utf-8')
             if(data.startswith('New Client') and not (addr in self.clients.keys())):
                 if(user.AVAILABLE_IDS != []):
@@ -34,31 +37,35 @@ class Server:
                 
             print('Message from: ' + str(addr))
             print('From connected user: ' + data)
-            
+        conn.close()
             
         self.Close()
     
     def Close(self):
-        mySocket.close()
+        self.mySocket.close()
 
 class Client:
     def __init__(self, ip, port):
         self.server = (ip, port)
-        self.Open()
+        self.Connect()
         
-    def Open(self):
-        self.mySocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    def Connect(self):
+        self.mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.mySocket.connect(self.server)
         
         msg = 'New Client'
-        self.mySocket.sendto(msg.encode('utf-8'), self.server)
+        self.mySocket.send(msg.encode('utf-8'))
+        #self.mySocket.sendto(msg.encode('utf-8'), self.server)
         
     def Close(self):
         msg = 'Client Disconnecting'
-        self.mySocket.sendto(msg.encode('utf-8'), self.server)
+        self.mySocket.send(msg.encode('utf-8'))
+        #self.mySocket.sendto(msg.encode('utf-8'), self.server)
         self.mySocket.close()
     
     def SendMessageToServer(self, msg):
-        self.mySocket.sendto(msg.encode('utf-8'), self.server)
+        self.mySocket.send(msg.encode('utf-8'))
+        #self.mySocket.sendto(msg.encode('utf-8'), self.server)
         
 if __name__ == '__main__':
     inp = int(input('1 - Server\n2 - Client\n-> '))
