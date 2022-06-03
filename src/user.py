@@ -8,10 +8,9 @@ class User:
         self.vPad = gamepad.XboxGamepad()
         
     def Input(self, inp):
-        event = inp.split('|')
-        eventType = event[0]
-        eventCode = event[1]
-        eventState = int(event[2])
+        eventType = inp['type']
+        eventCode = inp['code']
+        eventState = int(inp['state'])
         
         self.vPad.HandleEvent(eventType, eventCode, eventState)
         

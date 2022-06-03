@@ -124,8 +124,8 @@ def EventThread(client):
                         RecentEvents[event.code] = event
                 continue
                 
-            eventMsg = event.ev_type + '|' + event.code + '|' + str(event.state)
-            client.SendMessageToServer(eventMsg)
+            #eventMsg = event.ev_type + '|' + event.code + '|' + str(event.state)
+            client.SendEventMessageToServer(event)
             print(event.ev_type, event.code, event.state)
 
 def ClientThread(client):
@@ -137,8 +137,7 @@ def ClientThread(client):
             events = list(RecentEvents.values())
             RecentEvents.clear()
         for event in events:
-            eventMsg = event.ev_type + '|' + event.code + '|' + str(event.state)
-            client.SendMessageToServer(eventMsg)
+            client.SendEventMessageToServer(event)
             
             print(event.ev_type, event.code, event.state)
             
