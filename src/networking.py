@@ -4,7 +4,7 @@ import json
 from inputs import get_gamepad
 from inputs import devices
 
-HDR_SIZE = 31
+HDR_SIZE = 32
 SIZE = 1024
 
 class Server:
@@ -93,7 +93,7 @@ class Client:
 
 
 def GenerateHeader(msgType, size):
-    length = str(size).zfill(2)
+    length = str(size).zfill(3)
         
     hdrJson = {
         'type': msgType,
