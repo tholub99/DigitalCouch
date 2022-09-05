@@ -27,7 +27,13 @@ class Server:
             dataType, dataSize = self.ReadHeader(conn)
             data = conn.recv(dataSize)
             data = data.decode('utf-8')
-            dataJson = json.loads(data)
+            print('From connected user: ' + data)
+            try:
+                dataJson = json.loads(data)
+            except:
+                print('content read err, disconnecting client:\n' + data)
+                break
+            
             
             #Alert Message
             if dataType == 'alert':
@@ -43,9 +49,6 @@ class Server:
             elif dataType == 'event':
                 if(addr in self.clients.keys()):
                     self.clients[addr].Input(dataJson)
-                
-            print('Message from: ' + str(addr))
-            print('From connected user: ' + data)
             
         conn.close()
         self.Close()

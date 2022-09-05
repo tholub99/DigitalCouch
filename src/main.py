@@ -1,10 +1,11 @@
 from inputs import get_gamepad
 from inputs import devices
 from player import Player
-from threading import Thread, Lock
+from threading import Thread, Lock, Timer
 import gamepad
 import networking
 import time
+import socket
 
 class Host:
     def __init__(self):
@@ -15,18 +16,17 @@ def Server():
 def Client():
     #ip = input('Server IP -> ')
     #port = int(input('Server Port -> '))
-    client = networking.Client('71.232.60.65', 5000)
+    client = networking.Client(socket.gethostname(), 5000)
+    
     
     for device in devices:
         print(device)
-    clientThread = Thread(target=ClientThread, args=(client,))
+
     eventThread = Thread(target=EventThread, args=(client,))
 
     eventThread.start()
-    clientThread.start()
     
     eventThread.join()
-    clientThread.join()
     client.Close();
     
 def Test():
@@ -103,8 +103,26 @@ def ClientTestThread():
 
 def EventThread(client):
     global RecentEvents
-    global lock
+    #global lock
+    global sendAbs
+    
+    sendAbs = True
+    
     while True:
+        
+        #Send Recent ABS Event
+        if(sendAbs):
+            sendAbs = False
+            events = list(RecentEvents.values())
+            RecentEvents.clear()
+        
+            for event in events:
+                client.SendEventMessageToServer(event)
+                print(event.ev_type, event.code, event.state)
+            unblockAbs = Timer(0.1, AllowAbsSend)
+            unblockAbs.start()
+        
+        
         events = get_gamepad()
         #print(events)
         for event in events:
@@ -120,28 +138,16 @@ def EventThread(client):
                     AbsPrevEvent[event.code] = event.state
                     
                 if(not skipEvent):
-                    with lock:
                         RecentEvents[event.code] = event
                 continue
-                
-            #eventMsg = event.ev_type + '|' + event.code + '|' + str(event.state)
+            
+            #Send KEY Event
             client.SendEventMessageToServer(event)
             print(event.ev_type, event.code, event.state)
-
-def ClientThread(client):
-    global RecentEvents
-    global lock
-    while True:
-        #print(RecentEvents)
-        with lock:
-            events = list(RecentEvents.values())
-            RecentEvents.clear()
-        for event in events:
-            client.SendEventMessageToServer(event)
             
-            print(event.ev_type, event.code, event.state)
-            
-        time.sleep(0.1)
+def AllowAbsSend():
+    global sendAbs
+    sendAbs = True
 
 AbsPrevEvent = {
     'ABS_Y': None,
@@ -151,7 +157,7 @@ AbsPrevEvent = {
 }
 
 def IsDuplicateEvent(event):
-    if(abs(event.state - AbsPrevEvent[event.code]) <= 10):
+    if(abs(event.state - AbsPrevEvent[event.code]) <= 100):
         return True
     AbsPrevEvent[event.code] = event.state
     return False
