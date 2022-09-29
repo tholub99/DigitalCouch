@@ -3,6 +3,7 @@ import user
 import json
 from inputs import get_gamepad
 from inputs import devices
+from threading import Thread, Lock, Timer
 
 HDR_SIZE = 32
 SIZE = 1024
@@ -18,11 +19,22 @@ class Server:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((self.ip, self.port))
-        self.sock.listen(1)
-        
         print('Server Started on', self.ip + ':' + str(self.port))
         
-        conn, addr = self.sock.accept()
+        self.sock.listen(3)
+        
+        clients = []
+        while True:
+            conn, addr = self.sock.accept()
+            newClient = Thread(target=self.ClientThread, args=(conn, addr,))
+            clients.append(newClient)
+            newClient.start()
+            
+        for client in clients:
+            client.join()
+        self.Close()
+        
+    def ClientThread(self, conn, addr):
         while True:
             dataType, dataSize = self.ReadHeader(conn)
             data = conn.recv(dataSize)
@@ -51,7 +63,8 @@ class Server:
                     self.clients[addr].Input(dataJson)
             
         conn.close()
-        self.Close()
+            
+        
         
     def ReadHeader(self, conn):
         hdr = conn.recv(HDR_SIZE)
